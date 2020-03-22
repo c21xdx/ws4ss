@@ -1,0 +1,78 @@
+{
+  "log": {
+    "loglevel": "warning"
+  },
+  "inbounds": [
+    {
+      "port": 10086,  
+      "listen": "0.0.0.0",
+      "protocol": "dokodemo-door",
+      "tag": "wsdoko",
+      "settings": {
+        "address": "v1.mux.cool",
+        "followRedirect": false,
+        "network": "tcp"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/"
+        }
+      }
+    },
+    {
+      "port": 9015,
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "aes-128-gcm",
+        "ota": false,
+        "password": "ss_passwd",
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "network": "domainsocket"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "blocked"
+    },
+    {
+      "protocol": "freedom",
+      "tag": "ssmux",
+      "streamSettings": {
+        "network": "domainsocket"
+      }
+    }
+  ],
+  "transport": {
+    "dsSettings": {
+      "path": "./ss-loop.sock"
+    }
+  },
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": [
+          "wsdoko"
+        ],
+        "outboundTag": "ssmux"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "blocked"
+      }
+    ]
+  }
+}
